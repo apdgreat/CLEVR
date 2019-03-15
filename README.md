@@ -1,0 +1,2 @@
+# Hackfest
+Autonomous waiter/clerk
