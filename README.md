@@ -4,8 +4,8 @@ Autonomous waiter/clerk
  int h=0;
 const char* ssid = "Mr.A";
 const char* password = "ayan1999";
-int ir1=15,ir2=2,ir3=3;//ul1=4,ul2=5,m1a=6,m1b=7,m2a=8,m2b=9;
-//int ledPin = 13; // GPIO13---D7 of NodeMCU
+int ir1=15,ir2=2,ir3=3;
+
 WiFiServer server(80);
  
 void setup() {
@@ -18,9 +18,9 @@ void setup() {
   Serial.begin(115200);
   delay(10);
  
-// digitalWrite(ledPin, LOW);
+
  
-  // Connect to WiFi network
+  
   Serial.println();
   Serial.println();
   Serial.print("Connecting to ");
