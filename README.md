@@ -1,103 +1,148 @@
 # Hackfest
 Autonomous waiter/clerk
 #include <ESP8266WiFi.h>
- int h=0;
+int h = 0;
 const char* ssid = "Mr.A";
 const char* password = "ayan1999";
-int ir1=15,ir2=2,ir3=3;//ul1=4,ul2=5,m1a=6,m1b=7,m2a=8,m2b=9;
-//int ledPin = 13; // GPIO13---D7 of NodeMCU
-WiFiServer server(80);
- 
+int ir1 = 12, ir2 = 13, ir3 = 15, m1a = 16, m1b = 5, m2a = 4, m2b = 2;
 void setup() {
-  pinMode(ir1,OUTPUT);
-  pinMode(ir2,OUTPUT);
-  pinMode(ir3,OUTPUT);
-  digitalWrite(ir1,LOW);
-  digitalWrite(ir2,LOW);
-  digitalWrite(ir3,LOW);
   Serial.begin(115200);
-  delay(10);
- 
-// digitalWrite(ledPin, LOW);
- 
-  // Connect to WiFi network
-  Serial.println();
-  Serial.println();
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
- 
-  WiFi.begin(ssid, password);
- 
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("");
-  Serial.println("WiFi connected");
- 
-  // Start the server
-  server.begin();
-  Serial.println("Server started");
- 
-  // Print the IP address
-  Serial.print("Use this URL to connect: ");
-  Serial.print("http://");
-  Serial.print(WiFi.localIP());
-  Serial.println("/");
- 
+
+  pinMode(ir1, INPUT);
+  pinMode(ir2, INPUT);
+  pinMode(ir3, INPUT);
+  pinMode(m1a, OUTPUT);
+  pinMode(m1b, OUTPUT);
+  pinMode(m2a, OUTPUT);
+  pinMode(m2b, OUTPUT);
+  digitalWrite(m1a, LOW);
+  digitalWrite(m1b, LOW);
+  digitalWrite(m2b, LOW);
+  digitalWrite(m2a, HIGH);
+  delay(100);
+  digitalWrite(m2a, LOW);
 }
- 
-void loop() 
+void loop() {
+  int b; int value = LOW;
+  if (Serial.available() > 0)
+    b = Serial.read();
+  if (b == 1)
+  { Serial.println("1");
+    if (h < 1)
+      junction(1 - h);
+    else
+    {
+      turn();
+      junction(h - 1);
+    }
+  }
+  else if (b == 2) {
+    Serial.println("2");
+    if (h < 2)
+      junction(2 - h);
+    else
+    {
+      turn();
+      junction(h - 2);
+    }
+  }
+  else if (b == 3) {
+    Serial.println("3");
+    junction(3 - h);
+  }
+  else if (b == 4) {
+    turn();
+    junction(h);
+  }
+  else if (b == 5) {
+    stopb();
+  }
+}
+void junction(int n)
+{ /*  pinMode(ir1, INPUT);
+    pinMode(ir2, INPUT);
+    pinMode(ir3, INPUT);
+    pinMode(m1a, OUTPUT);
+    pinMode(m1b, OUTPUT);
+    pinMode(m2a, OUTPUT);
+    pinMode(m2b, OUTPUT);
+    digitalWrite(ledPin, LOW);*/
+  int c = 0;
+
+  while (c == (n + 1))
+  {
+
+    int a = 0;
+    if (digitalRead(ir1) == HIGH && digitalRead(ir3) == HIGH && digitalRead(ir2) == HIGH)
+      a = 1;
+    while (digitalRead(ir1) == LOW && digitalRead(ir3) == LOW && digitalRead(ir2) == HIGH)
+    {
+      forward();
+    }
+    while (digitalRead(ir1) == HIGH && digitalRead(ir3) == LOW && digitalRead(ir2) == HIGH)
+    {
+      right();
+    }
+    while (digitalRead(ir1) == LOW && digitalRead(ir3) == HIGH && digitalRead(ir2) == HIGH)
+    {
+      left();
+    }
+    while ((digitalRead(ir1) == HIGH) && (digitalRead(ir3) == HIGH) && digitalRead(ir2) == HIGH)
+    { if (a == 1)
+        c++;
+      a = 0; forward();
+    }
+    stopb();
+    h = n;
+  }
+  return;
+}
+
+void turn()
 {
-  // Check if a client has connected
-  WiFiClient client = server.available();
-  if (!client) {
-    return;
-  }
- 
-  // Wait until the client sends some data
-  Serial.println("new client");
-  while(!client.available()){
-    delay(1);
-  }
- 
-  // Read the first line of the request
-  String request = client.readStringUntil('\r');
-  Serial.println(request);
-  client.flush();
- 
-  // Match the request
- 
-  int value = LOW;
-  if (request.indexOf("/j1") != -1){digitalWrite(ir1,HIGH);}
-    
- if (request.indexOf("/j2") != -1){digitalWrite(ir2,HIGH);}
-   
-   if (request.indexOf("/j3") != -1){
-    digitalWrite(ir3,HIGH);}
-    
-    if (request.indexOf("/return") != -1)  { digitalWrite(ir1,LOW);
-    digitalWrite(ir2,LOW);digitalWrite(ir2,LOW);}
-    
-  
-
-  // Return the response
-  client.println("HTTP://192.168.43.171");
-  client.println("Content-Type: text/html");
-  client.println(""); //  do not forget this one
-  client.println("<!DOCTYPE HTML>");
-  client.println("<html>");
-  client.println("<br><br>");
-  client.println("<a href=\"/j1\"\"><button>Junction 1 </button></a>");
-  client.println("<a href=\"/j2\"\"><button>Junction 2 </button></a>");
-  client.println("<a href=\"/j3\"\"><button>Junction 3 </button></a>");
-  client.println("<a href=\"/return\"\"><button>Return </button></a><br />");    
-  client.println("</html>");
- 
-  delay(1);
-  Serial.println("Client disonnected");
-  Serial.println("");
- 
+  right();
+  delay(1000);
+  while (!(digitalRead(ir1) == LOW && digitalRead(ir3) == LOW && digitalRead(ir2) == HIGH))
+    right();
 }
+void forward()
+{
+  digitalWrite(m1a, HIGH);
+  digitalWrite(m2a, HIGH);
+  digitalWrite(m1b, LOW);
+  digitalWrite(m2b, LOW);
+  delay(10);
+}
+void right()
+{
+  digitalWrite(m1a, LOW);
+  digitalWrite(m2a, HIGH);
+  digitalWrite(m1b, LOW);
+  digitalWrite(m2b, LOW);
+  delay(100);
+}
+void left()
+{
+  digitalWrite(m1a, HIGH);
+  digitalWrite(m2a, LOW);
+  digitalWrite(m1b, LOW);
+  digitalWrite(m2b, LOW);
+  delay(100);
+}
+void back()
+{
+  digitalWrite(m1a, LOW);
+  digitalWrite(m2a, LOW);
+  digitalWrite(m1b, HIGH);
+  digitalWrite(m2b, HIGH);
+  delay(100);
+}
+void stopb()
+{
+  digitalWrite(m1a, LOW);
+  digitalWrite(m2a, LOW);
+  digitalWrite(m1b, LOW);
+  digitalWrite(m2b, LOW);
+  delay(100);
 
- 
+}
