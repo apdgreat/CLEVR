@@ -1,5 +1,5 @@
 # Hackfest
-Autonomous waiter/clerk
+led control through net
 #include <ESP8266WiFi.h>
  int h=0;
 const char* ssid = "Mr.A";
